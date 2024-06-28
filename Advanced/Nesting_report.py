@@ -74,8 +74,7 @@ def count_efficiency():
 
 
 def change_label_into_id(s_sheet):
-    gdb.get_label(lay)
-    gdb.set_label()
+    label = gdb.get_label()
 
 
 
@@ -189,8 +188,126 @@ def make_report():
                         # Name of the jpg
                         #sImgPath = sFolder + sSheet + sImgExt ;   
                         nest.activate()
+                        sheets = nest.get_sheets()
+
+                    for sheet in sheets:
+                        width = nest.get_sheet_property(sheet, nest.SheetProperties.WIDTH)               #_NSheetWidth
+                        height = nest.get_sheet_property(sheet, nest.SheetProperties.HEIGHT)             #_NSheetHeight
+                        thickness = nest.get_sheet_property(sheet, nest.Properties.SHEET_THICKNESS)      #_NSheetRateReusable
+                        matherial = nest.get_sheet_property(sheet, nest.SheetProperties.MATERIAL)        #_NSheetMaterial
+                        name = gdb.get_names(part+'\\%%NESTDATA\\Pieces') #??
+                        #ChangeLabelIntoId( sSheet) ;  #?????????????? how
+                        if width > width:
+                            if not rotate:
+                                width_img = height * 0.35
+                                height_img = height * 0.35
+                            else:
+                                width_img = width * 0.35
+                                height_img = height * 0.35
+                        else:
+                            if not rotate:
+                                width_img = height * 0.35
+                                height_img = width * 0.35
+                            else:
+                                width_img = width * 0.35
+                                height_img = height * 0.35
+                        file = next(os.walk(folder))[2][0] if os.listdir(folder) else ""
+                        object_path = sheet #???????????????????????????????????????????????
+                        view.zoom_on_object(object_path, ratio=1)
+                        # bOk = bOk  AND  ExportImage( sImgPath, nHeightImg, nWidthImg, 24) ;
+
+                        # Tabelle aufmachen..
+                        write_html()
+
+                        #restore the initial sheet
+                        #bOk = bOk  AND  NestActivateSheet( sCurrSheet) ;
+                        if rotate:
+                            cad.rotate(sheet, 0, 0, -90, False)
+                        
+                        # ProgressClose() ;
+                        # SetShading() ;
 
 
+
+def write_html():
+    #open table
+    line = "<TABLE"
+    #start a new page
+    if count != 0:
+        line += ' style="page-break-before:always"'
+
+    #table for customer information - header row
+    line += f'> <TR> <TD rowspan="3"> <IMG src="{logo}" align="middle"> </TD> </TR>'
+    line += '<TR> <TD> &nbsp; </TD> </TR>'
+    line += f'<TR> <TD style="font-size:30px" align="right" width="150"> Projekt: </TD> <TD width="15"> &nbsp; </TD> <TD style="font-size:30px">{os.path.splitext(get_name())[0]}</TD> </TR> </TABLE>'
+    file.write(line)
+
+    # Table for sheet information
+    line = '<TABLE border="1" cellspacing="1" cellpadding="1">'
+    file.write(line)
+
+    # Row with sheet name
+    line = f'<TR> <TD style="font-size:30px" colspan="6" align="middle">{sheet}</TD>'
+
+    count += 1
+    s_count = str(count).zfill(3)
+    #adding the barcode
+    line += f'<TD id="code{s_count}" colspan="4" class="barcode">{sheet.upper()}</TD>'
+    line += '</TR>'
+    file.write(line)
+
+    # Sheet information - Width, Height, Thickness, Name, Material
+    line = f'<TR> <TD align="middle"> Breite </TD> <TD align="middle">{width}</TD>'
+    line += f'<TD align="middle"> Höhe </TD> <TD align="middle">{height}</TD>'
+    line += f'<TD align="middle"> Stärke </TD> <TD align="middle">{thickness}</TD>'
+    line += f'<TD align="middle"> Name </TD> <TD align="middle">{name}</TD>'
+    line += f'<TD align="middle"> Material </TD> <TD align="middle">{material}</TD></TR>'
+    file.write(line)
+
+
+
+
+
+    #picture from the sheet
+    #sSizeImg = OPT( nWidth>3*nHeight, "width=^"1200pt^"", "height=^"400pt^"") ;
+    size_img = "width=\"1200pt\"" if nWidth > 3 * nHeight else "height=\"400pt\""
+    line = '<TR> <TD colspan="10"> <IMG src="file:///{img_path}"{size_img}> </TD></TR>'
+    file.write(line)
+
+    #Write down the individual information about the components.
+    s_pieces = nest.get_pieces(sheet)
+    n_piece_count = 1
+    file = next(os.walk(folder))[2][0] if os.listdir(folder) else ""
+    while (file != ""):
+        line = "<TR> "
+        #HTML Schnittplan
+        line += f'<TD align="middle"> Nr. </TD> <TD align="middle">{n_piece_count}</TD>'
+
+        label = nest.get_sheet_property(sheet, nest.Properties.PIECE_LABEL)
+        width = nest.get_sheet_property(sheet, nest.SheetProperties.WIDTH)               #_NSheetWidth
+        height = nest.get_sheet_property(sheet, nest.SheetProperties.HEIGHT)             #_NSheetHeight
+        #bOk = bOk  AND  NestGetPieceProp( sPiece, _NPieceLabel, &sLabel) ;
+
+        line += '<TD align="middle"> Bezeichnung </TD> <TD align="middle">{label}</TD>'
+        line += '<TD align="middle"> Breite </TD> <TD align="middle">{width}</TD>'
+        line += '<TD align="middle"> Breite </TD> <TD align="middle">{height}</TD>'
+        line += '</TR>'
+        file.write(line)
+        n_piece_count += 1
+        #close table
+        line = '</TABLE></BR>'
+        file.write(line)
+        #update status
+
+        perc = count / n_sheets
+        #bOk = bOk  AND  ProgressUpdate( perc) ;   ????????
+        count += 1
+
+        insert_java_script()
+
+        line = '</BODY></HTML>'
+        file.write(line)
+        #   bOk = bOk  AND  CloseFile( nFile) ;
 
 
 
