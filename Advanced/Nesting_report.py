@@ -14,10 +14,22 @@ from config import run_config
 from sclcore import do_debug
 
 
-def change_label_into_id(s_sheet):
-    #??? I don't know
-    label = gdb.get_label()
+def change_label_into_id(sheet):
+    #??? I don't know; I'm just trying to do the same thing as in SCL
+    label = gdb.get_label(sheet)
+    # pieces = nest.get_pieces(sheet)
+    # label_pieces = []
+    # for piece in pieces:
+    #     if piece.upper().endswith("_LABEL"):
+    #         label_pieces.append(piece)
     
+    # for label_piece in label_pieces:
+    #     geo = 
+
+
+
+
+
 
 def insert_java_script(file, nCount):
     line = f"""
@@ -55,35 +67,27 @@ def main():
     rotate = False #create hacken in settings or something like that
 
     do_debug()
-    # if project is only saved, then the scl is aborted
-    #   if( $NLS) return ;
-    #   dodebug() ;
-    # if file is not saved, then abort here...
-    # if( STRSTR( GetName(), ".ewd") < 1) {
     project_name = ewd.get_project_name() # get the name of the opened ewd project
     if not project_name.endswith (".ewd"):
-        dlg.output_box( "EWD Datei ewartet; Projekt bitte speichern. \nDie Schnittpläne & Labels wurden nicht erstellt.")
+        dlg.output_box( "Projekt bitte speichern. Die Schnittpläne und Labels wurden nicht erstellt.")
     
     #path for the print files
-    # = ExplodeFilePath( "%SETTINGPATH%" + "\Nest\Print") ;  
-    folder = r'C:\Users\...\Nesting_report\Nest\Print' #--- need to do something better than this
+    folder = r'C:\Users\...\Nest\Print' #--- need to do something better than this
 
-    #if folder doesn't exist, crate
+    #if folder doesn't exist, create
     if not os.path.exists(folder):
-        os.makedirs(folder, exist_ok=False) #not sureeee
+        os.makedirs(folder, exist_ok=False)
     
-    # if available, these will be deleted first
-    #iterate through each file and remove every file
+    #iterate through each file and remove it
     file_in_folder = next(os.walk(folder))[2][0] if os.listdir(folder) else ""
     while (file_in_folder != ""):
             os.remove(os.path.join(folder, file_in_folder))
             file_in_folder = next(os.walk(folder))[2][0] if os.listdir(folder) else ""
 
-    report_file = r'C:\Users\...\Nest\Print\report.html'
+    report_file = r'C:\Users\....\Nest\Print\report.html' #--- again, need to do something better than this
     if not os.path.isfile(report_file):
         os.makedirs(os.path.dirname(report_file), exist_ok=True)
 
-    ok = True
     n_sheets = 0
     if not folder.endswith("\\"):
         folder += "\\"
@@ -93,23 +97,20 @@ def main():
 
     #switch to top view; wireframe
     view.set_std_view_eye()
-    #Ok = bOk  AND  SetWireFrame() ? how to make it
-
-    #open 3 files
-    #try: except, write later
+    #Ok = bOk  AND  SetWireFrame() ??????????????? how to make it
 
     with open(report_file, 'w', encoding='utf-8') as html_file:
             #open status bar            Ok = bOk  AND  ProgressCreate( "Print") ;
 
-            #if my program is working with 2 files at the same time (writing to html and getting info out of ewd) do i have to open-close them each time?? how does it work?
             #HTML header and file name
             html_file.write(html_header_write(project_name))
             nest.activate()
             sheets = nest.get_sheets()
+
             for sheet in sheets: #call sheets list, delete number of sheets and empty sheets
                 if sheet == "": #how can it see that its empty or not?
                     sheet_to_delete = list(sheet) #NestDeleteSheets( sSheet)
-                    #mb change modul???
+                    #mb change modul?????????????
                     nest.delete_sheets(sheet_to_delete) # ??? I'm very unsure what im doing; I didn't find how to delete a single sheet
                 else:
                     n_sheets += 1
@@ -124,7 +125,6 @@ def main():
                 #name of the jpg
                 img_path = f"{folder}{sheet}{img_ext}"
 
-
                 nC = 1
                 total_area = 0
                 total_garbage = 0
@@ -138,34 +138,20 @@ def main():
                 pieces = nest.get_sheet_property(sheet, nest.SheetProperties.PIECES_NUMBER)      #_NSheetNumPieces
                 curr1 = nest.get_sheet_property(sheet, nest.SheetProperties.RATE_LEFT_OVER)      #_NSheetRateLeftOver  % of sheet   garbage not reusable material
                 curr2 = nest.get_sheet_property(sheet, nest.SheetProperties.RATE_REUSABLE)       #_NSheetRateReusable  % of sheet   reusable material
-                area = (area / 1000000) # m2
-                total_area += area      # m2
-                total_garbage += curr1  # %
-                total_reusable += curr2 # %
-
+                area = (area / 1000000)   # m2
+                total_area += area        # m2
+                total_garbage += curr1    # %
+                total_reusable += curr2   # %
                 name = sheet
+                
                 #ChangeLabelIntoId( sSheet) ;  #?????????????? how
-                if width > height:
-                    if not rotate:
-                        width_img = height * 0.35
-                        height_img = width * 0.35
-                    else:
-                        width_img = width * 0.35
-                        height_img = height * 0.35
-                else:
-                    if not rotate:
-                        width_img = height * 0.35
-                        height_img = width * 0.35
-                    else:
-                        width_img = width * 0.35
-                        height_img = height * 0.35
+
 
                 object_path = groups.get_current()
-                #?  # cfg_file = open(ewd.explode_file_path(INI_PATH), 'w')
-                #get_project_path
 
+                #get_project_path
                 if not os.path.isfile(img_path):
-                    os.makedirs(os.path.dirname(img_path), exist_ok=True)
+                    os.makedirs(os.path.dirname(img_path), exist_ok=True)  #do i for sure need that?
 
                 view.zoom_on_object(object_path, ratio=1)
                 nest.get_sheet_preview(sheet, img_path, 1.)
@@ -183,22 +169,24 @@ def main():
                 if rotate:
                     cad.rotate(sheet, 0, 0, -90, False)
                 
-                # ProgressClose() ;    close progressbar 
+                # ProgressClose() ;    close progressbar
                 # SetShading() ;      Set the view as shaded
 
                 #to_pdf()
 
 
-def write_html(file, logo, project_name, sheet, sheets, n_sheets, count, thickness, name, material, folder, pieces, total_area, curr1, curr2, total_reusable, total_garbage, img_path):  ####maaaaybe do that differently
-    #label = nest.get_sheet_property(sheet, nest.Properties.PIECE_LABEL)
-    label = 'abc'
+
+                        
+
+def write_html(file, logo, project_name, sheet, sheets, n_sheets, count, thickness, name, material, folder, pieces, total_area, curr1, curr2, total_reusable, total_garbage, img_path):  ####maaaybe do that differently?
+    label = nest.get_sheet_property(sheet, nest.PieceProperties.LABEL)
+    #label = 'abc'
     width = nest.get_sheet_property(sheet, nest.SheetProperties.WIDTH)               #_NSheetWidth
     height = nest.get_sheet_property(sheet, nest.SheetProperties.HEIGHT)             #_NSheetHeight
     #bOk = bOk  AND  NestGetPieceProp( sPiece, _NPieceLabel, &sLabel) ;
 
-    #open table
+    #open table, start a new page
     line = "<TABLE"
-    #start a new page
     if count != 0:
         line += ' style="page-break-before:always"'
     file.write(line)
@@ -237,7 +225,7 @@ def write_html(file, logo, project_name, sheet, sheets, n_sheets, count, thickne
     line += '</TR>'
     file.write(line)
 
-    #sheet information - Width, Height, Thickness, Name, Material
+    #sheet information - width, height, thickness, name, material
     line = f"""
     <TR>
         <TD align="middle">Breite</TD>
@@ -286,7 +274,7 @@ def write_html(file, logo, project_name, sheet, sheets, n_sheets, count, thickne
     file.write(line)
 
     #update status
-    perc = count / n_sheets
+    #perc = count / n_sheets
     #bOk = bOk  AND  ProgressUpdate( perc) ;   ????????
     count += 1
 
@@ -302,16 +290,18 @@ def count_efficiency(file, sheet, sheets, pieces, total_area, curr1, curr2, tota
     do_debug()
     #    autocam_aktivieren = config.get('SETTINGS', 'autocam_aktivieren')
     #    if autocam_aktivieren:
-    sheets = nest.get_sheets()
+    sheets = nest.get_sheets() #do i need that?.. or then delete an arfgument to this function
 
     if sheet:
-
         file.write(efficiency_for_sheet(pieces, total_area, curr1, curr2))
 
         #here we do total_efficiency after every sheet was dealt with
-        if sheet == sheets[-1]: #if current sheet is the last sheet in list of sheets
-            nSheets = len(sheets)
-            file.write(efficiency_sheets_total(nSheets, total_area, total_reusable, total_garbage))
+        if sheet == sheets[-1] and sheets[0] != sheet: #if current sheet is the last sheet in list of sheets; AND it's not a single sheet in a list
+            number_of_sheets = len(sheets)
+            file.write(efficiency_sheets_total(number_of_sheets, total_area, total_reusable, total_garbage))
+
+
+ffffffffffffffffffffffff
 
 
 def efficiency_for_sheet(pieces, total_area, curr1, curr2):
@@ -342,14 +332,14 @@ def efficiency_for_sheet(pieces, total_area, curr1, curr2):
         """
 
 
-def efficiency_sheets_total(nSheets, total_area, total_reusable, total_garbage):
-    total_garbage /= nSheets #bc I need to not only add % from every sheet but also get the Durchschnitt
-    total_reusable /= nSheets
+def efficiency_sheets_total(number_of_sheets, total_area, total_reusable, total_garbage):
+    total_garbage /= number_of_sheets #bc I need to not only add % from every sheet but also get the Durchschnitt
+    total_reusable /= number_of_sheets
     return f"""<BR/>
         <TABLE border="7" cellspacing="2" cellpadding="3">
 
             <TR><TH style="font-weight: normal;" align="left">Anzahl Sheets</TH>
-                <TH style="font-weight: normal;" colspan="2" align="left"> {nSheets}</TH>
+                <TH style="font-weight: normal;" colspan="2" align="left"> {number_of_sheets}</TH>
             </TR>
 
             <TR>
@@ -386,13 +376,15 @@ def html_header_write(project_name):
     """
 
 
+
 # def to_pdf():
 #     path_to_wkhtmltopdf = r'c:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
 #     path_to_html = r'C:\Users\...\Nesting_report\report.html'
 #     config = pdfkit.configuratiuon(wkhtmltopdf = path_to_wkhtmltopdf)
 #     pdfkit.from_file(path_to_html, output_path = 'report.html', configuration = config)
 
-#    sWkHtmlToPdf = "wkhtmltopdf.exe" ;
+
+
 
 
 
