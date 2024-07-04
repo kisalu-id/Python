@@ -14,65 +14,25 @@ from config import run_config
 from sclcore import do_debug
 
 
-def change_label_into_id(sheet):
-    #??? I don't know; I'm just trying to do the same thing as in SCL
-    label = gdb.get_label(sheet)
-    # pieces = nest.get_pieces(sheet)
-    # label_pieces = []
-    # for piece in pieces:
-    #     if piece.upper().endswith("_LABEL"):
-    #         label_pieces.append(piece)
-    
-    # for label_piece in label_pieces:
-    #     geo = 
-
-
-
-
-
-
-def insert_java_script(file, nCount):
-    line = f"""
-    <script type="text/javascript">
-    /* <![CDATA[ */
-    function get_object(id) {{
-        var object = null;
-        if (document.layers) {{
-            object = document.layers[id];
-        }} else if (document.all) {{
-            object = document.all[id];
-        }} else if (document.getElementById) {{
-            object = document.getElementById(id);
-        }}
-        return object;
-    }}
-    """
-    file.write(line)
-
-    while(nCount > 0):
-        sCount = str(nCount).zfill(3)
-        line = f'get_object("code{sCount}").innerHTML = DrawHTMLBarcode_Code39(get_object("code{sCount}").innerHTML, 0, "yes", "in", 0, 3, 0.4, 3, "top", "center", "", "black", "white");\n'
-        file.write(line)
-        nCount -= 1
-
-    line = """
-    /* ]]> */
-    </script>
-    """
-    file.write(line)
-
-
-
 def main():
-    rotate = False #create hacken in settings or something like that
-
     do_debug()
+    ini_path = ewd.explode_file_path(r'C:\Users\...\Nesting_report\config_nr.ini') #wo liegt die ini Datei von Nest settings
+    config = configparser.ConfigParser()
+    config.read(ini_path)
+    rotate = config.get('Einstellung', 'turn') #create hacken in settings or something like that
+    #????????????? save the project automatically here? line 129
+    # if project is only saved, then the scl is aborted
+    #   if( $NLS) return ;
+    #   dodebug() ;
+    # if file is not saved, then abort here...
+    # if( STRSTR( GetName(), ".ewd") < 1) {
     project_name = ewd.get_project_name() # get the name of the opened ewd project
     if not project_name.endswith (".ewd"):
         dlg.output_box( "Projekt bitte speichern. Die Schnittpläne und Labels wurden nicht erstellt.")
     
     #path for the print files
-    folder = r'C:\Users\...\Nest\Print' #--- need to do something better than this
+    # = ExplodeFilePath( "%SETTINGPATH%" + "\Nest\Print") ;
+    folder =  config.get('Pfad', 'report_pfad')
 
     #if folder doesn't exist, create
     if not os.path.exists(folder):
@@ -84,7 +44,7 @@ def main():
             os.remove(os.path.join(folder, file_in_folder))
             file_in_folder = next(os.walk(folder))[2][0] if os.listdir(folder) else ""
 
-    report_file = r'C:\Users\....\Nest\Print\report.html' #--- again, need to do something better than this
+    report_file = f'{folder}\\report.html' #--- again, need to do something better than this
     if not os.path.isfile(report_file):
         os.makedirs(os.path.dirname(report_file), exist_ok=True)
 
@@ -143,9 +103,6 @@ def main():
                 total_garbage += curr1    # %
                 total_reusable += curr2   # %
                 name = sheet
-                
-                #ChangeLabelIntoId( sSheet) ;  #?????????????? how
-
 
                 object_path = groups.get_current()
 
@@ -163,24 +120,62 @@ def main():
                 nSheets += 1
                 nC += 1
 
-                #restore the initial sheet
-                #bOk = bOk  AND  NestActivateSheet( sCurrSheet) ;
-
                 if rotate:
                     cad.rotate(sheet, 0, 0, -90, False)
-                
-                # ProgressClose() ;    close progressbar
-                # SetShading() ;      Set the view as shaded
 
-                #to_pdf()
+                to_pdf(report_file, folder)
 
 
 
-                        
+
+
+def change_label_into_id(sheet):
+    #??? I don't know; I'm just trying to do the same thing as in SCL
+    label = gdb.get_label(sheet)
+    # pieces = nest.get_pieces(sheet)
+    # label_pieces = []
+    # for piece in pieces:
+    #     if piece.upper().endswith("_LABEL"):
+    #         label_pieces.append(piece)
+    
+    # for label_piece in label_pieces:
+    #     geo = 
+
+
+def insert_java_script(file, nCount):
+    line = f"""
+    <script type="text/javascript">
+    /* <![CDATA[ */
+    function get_object(id) {{
+        var object = null;
+        if (document.layers) {{
+            object = document.layers[id];
+        }} else if (document.all) {{
+            object = document.all[id];
+        }} else if (document.getElementById) {{
+            object = document.getElementById(id);
+        }}
+        return object;
+    }}
+    """
+    file.write(line)
+
+    while(nCount > 0):
+        sCount = str(nCount).zfill(3)
+        line = f'get_object("code{sCount}").innerHTML = DrawHTMLBarcode_Code39(get_object("code{sCount}").innerHTML, 0, "yes", "in", 0, 3, 0.4, 3, "top", "center", "", "black", "white");\n'
+        file.write(line)
+        nCount -= 1
+
+    line = """
+    /* ]]> */
+    </script>
+    """
+    file.write(line)
+
 
 def write_html(file, logo, project_name, sheet, sheets, n_sheets, count, thickness, name, material, folder, pieces, total_area, curr1, curr2, total_reusable, total_garbage, img_path):  ####maaaybe do that differently?
-    label = nest.get_sheet_property(sheet, nest.PieceProperties.LABEL)
-    #label = 'abc'
+    #label = nest.get_sheet_property(sheet, nest.PieceProperties.LABEL)
+    label = 'abc'
     width = nest.get_sheet_property(sheet, nest.SheetProperties.WIDTH)               #_NSheetWidth
     height = nest.get_sheet_property(sheet, nest.SheetProperties.HEIGHT)             #_NSheetHeight
     #bOk = bOk  AND  NestGetPieceProp( sPiece, _NPieceLabel, &sLabel) ;
@@ -301,8 +296,6 @@ def count_efficiency(file, sheet, sheets, pieces, total_area, curr1, curr2, tota
             file.write(efficiency_sheets_total(number_of_sheets, total_area, total_reusable, total_garbage))
 
 
-ffffffffffffffffffffffff
-
 
 def efficiency_for_sheet(pieces, total_area, curr1, curr2):
     return f"""<BR/>
@@ -376,17 +369,12 @@ def html_header_write(project_name):
     """
 
 
+def to_pdf(report_file, folder):
+    path_to_wkhtmltopdf = r'C:\Program Files\...\Bundles\wkhtmltopdf.exe'
+    config = pdfkit.configuration(wkhtmltopdf = path_to_wkhtmltopdf)
+    pdfkit.from_file(report_file, output_path = f'{folder}\report.pdf', configuration = config)
 
-# def to_pdf():
-#     path_to_wkhtmltopdf = r'c:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
-#     path_to_html = r'C:\Users\...\Nesting_report\report.html'
-#     config = pdfkit.configuratiuon(wkhtmltopdf = path_to_wkhtmltopdf)
-#     pdfkit.from_file(path_to_html, output_path = 'report.html', configuration = config)
-
-
-
-
-
+    
 
 if __name__ == '__main__':
     main()
