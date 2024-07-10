@@ -1,0 +1,156 @@
+<!-- HTML for inserting in python script -->
+<!DOCTYPE html>
+    <html lang="de">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{project_name}</title>
+    <script type="text/javascript" src="js/code39.js"></script>
+        <style>
+            table {
+                border: 1px solid black;
+                border-collapse: collapse;
+                margin: 10px 0;
+                width: 100%;
+            }
+            th, td {
+                border: 1px solid black;
+                text-align: left;
+                padding: 2px;
+            }
+            th {
+                font-weight: normal;
+            }
+
+            #thick-border {
+                border-width: 3px;
+            }
+            #center-text {
+                font-size: 20px;
+                padding: 3px;
+                text-align: center;
+            }
+    </style>
+</head>
+
+<body>
+
+    <div class="header-container">
+        <img src="{logo}" class="logo">
+        <span style="font-size: 35px; margin-left: 10px;">   Projekt: {project_name}</span>
+    </div>
+
+
+
+
+<TABLE id="mainTable">
+
+<TR> <TD style="font-size:30px" colspan="6">{sheet}</TD>
+<TD id="code{s_count}" colspan="4" class="barcode">{sheet.upper()}</TD>
+</TR>
+<TR>
+    <TD align="middle">Breite</TD>
+    <TD align="middle">{round(width, 2)}</TD>
+    <TD align="middle">Höhe</TD>
+    <TD align="middle">{round(height, 2)}</TD>
+    <TD align="middle">Stärke</TD>
+    <TD align="middle">{round(thickness, 2)}</TD>
+    <TD align="middle">Name</TD>
+    <TD align="middle">{name}</TD>
+    <TD align="middle">Materialfghfxggggggggggggh</TD>
+    <TD align="middle">{material}</TD>
+</TR>
+
+
+
+
+<TR> <TD colspan="10"> <IMG src="file:///{img_path}"{size_img}> </TD></TR>
+<TR>
+    <TD align="middle">Nr.</TD>
+    <TD align="middle">{n_piece_count}</TD>
+    <TD align="middle">Bezeichnung</TD>
+    <TD align="middle">{label}</TD>
+    <TD align="middle">Breite</TD>
+    <TD align="middle">{width}</TD>
+    <TD align="middle">Höhe</TD>
+    <TD align="middle">{height}</TD>
+</TR>
+
+<TABLE>
+    <TH colspan="3" id="center-text" class="adjustable-table">Effizienzbericht</TH>
+    <TR>
+        <TD>Guteile</TD>
+        <TD>{pieces}</TD>
+    </TR>
+    <TR>
+        <TD>Gesamtfläche</TD>
+        <TD>{total_area}  m²</TD>
+    </TR>
+    <TR>
+        <TD>Nicht wiederverwendbares Material</TD>
+        <TD>{round(curr1, 2)}% des Blattes   </TD>
+    </TR>
+    <TR>
+        <TD>Wiederverwendbares Material</TD>
+        <TD>{round(curr1, 2)}% des Blattes   </TD>
+    </TR>
+</TABLE>
+
+<BR/>
+<TABLE id="thick-border" class="adjustable-table">
+    <TH colspan="3" id="center-text">Gesamtwirkungsgradbericht</TH>
+    <TR><TH align="left">Anzahl Sheets</TH>
+        <TH colspan="2" align="left">{nSheets}</TH>
+    </TR>
+
+    <TR>
+        <TD>Gesamtfläche</TD>
+        <TH colspan="2" align="left">{round(total_area, 2)} m²</TH>
+    </TR>
+
+    <TR>
+        <TD>Wiederverwendbares Material pro Blatt im Durchschnitt:</TD>
+        <TD>{round(total_reusable, 2)}%</TD>
+        <TD>{round(total_area * total_reusable / 100, 2)} m²</TD>
+    </TR>
+
+    <TR>
+        <TD>Nicht wiederverwendbares Material pro Blatt im Durchschnitt</TD>
+        <TD>{round(total_garbage, 2)}%</TD>
+        <TD>{round(total_area * total_garbage / 100, 2)} m²</TD>
+    </TR>
+</TABLE>
+<BR/>
+
+
+
+<script type="text/javascript">
+    /* <![CDATA[ */
+    function get_object(id) {{
+        var object = null;
+        if (document.layers) {{
+            object = document.layers[id];
+        }} else if (document.all) {{
+            object = document.all[id];
+        }} else if (document.getElementById) {{
+            object = document.getElementById(id);
+        }}
+        return object;
+    }}
+
+    window.onload = function() {
+        var mainTable = document.getElementById('mainTable');
+        if (mainTable) {
+            var mainTableWidth = mainTable.offsetWidth;
+            var adjustableTables = document.querySelectorAll('.adjustable-table');
+            adjustableTables.forEach(function(table) {
+                table.style.width = mainTableWidth + 'px';
+            });
+        }
+    };
+
+        /* ]]> */
+    </script>
+
+
+</BODY></HTML>
