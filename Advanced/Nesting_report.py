@@ -1,17 +1,15 @@
 import os
 from datetime import datetime
+import configparser
 import ewd
-#import pdfkit #not working
+#import pdfkit
 from ewd import groups
-from company import gdb
 from company import dlg
 from company import nest
 from company.gdb import cad
-from company.gdb import path
-from company.gdb.view import redraw_window, zoom_all
 from company.gdb import view
-from config import run_config
 from sclcore import do_debug
+
 
 
 def main():
@@ -19,8 +17,10 @@ def main():
     ini_path = ewd.explode_file_path(r'C:\Users\...\Nesting_report\config_nr.ini') #wo liegt die ini Datei von Nest settings
     config = configparser.ConfigParser()
     config.read(ini_path)
-    rotate = config.get('Einstellung', 'turn') #create hacken in settings or something like that
-    #????????????? save the project automatically here? line 129
+    rotate = config.get('Einstellung', 'turn')
+    rotate = False if rotate == "0" else True
+
+    #?? save the project automatically here? line 129
     # if project is only saved, then the scl is aborted
     #   if( $NLS) return ;
     #   dodebug() ;
@@ -57,7 +57,7 @@ def main():
 
     #switch to top view; wireframe
     view.set_std_view_eye()
-    #Ok = bOk  AND  SetWireFrame() ??????????????? how to make it
+    #Ok = bOk  AND  SetWireFrame() ???? how to make it
 
     with open(report_file, 'w', encoding='utf-8') as html_file:
             #open status bar            Ok = bOk  AND  ProgressCreate( "Print") ;
@@ -70,7 +70,7 @@ def main():
             for sheet in sheets: #call sheets list, delete number of sheets and empty sheets
                 if sheet == "": #how can it see that its empty or not?
                     sheet_to_delete = list(sheet) #NestDeleteSheets( sSheet)
-                    #mb change modul?????????????
+                    #mb change modul??
                     nest.delete_sheets(sheet_to_delete) # ??? I'm very unsure what im doing; I didn't find how to delete a single sheet
                 else:
                     n_sheets += 1
@@ -114,24 +114,27 @@ def main():
                 nest.get_sheet_preview(sheet, img_path, 1.)
                 # bOk = bOk  AND  ExportImage( sImgPath, nHeightImg, nWidthImg, 24) ;
 
+                write_css(html_file)
+
                 #html efficiency for each sheet
-                write_html(html_file, logo, project_name, sheet, sheets, n_sheets, count, thickness, name, material, folder, pieces, total_area, curr1, curr2, total_reusable, total_garbage, img_path)
+                write_html(html_file, logo, project_name, sheet, sheets, count, thickness, name, material, pieces, total_area, curr1, curr2, total_reusable, total_garbage, img_path)
     
                 nSheets += 1
                 nC += 1
 
                 if rotate:
-                    cad.rotate(sheet, 0, 0, -90, False)
+                    cad.rotate(sheet, 0, 0, 90, False)
+                
+                # ProgressClose() ;    close progressbar
+                # SetShading() ;      Set the view as shaded
 
-                to_pdf(report_file, folder)
+                #to_pdf(report_file, folder)
 
 
 
-
-
-def change_label_into_id(sheet):
+#def change_label_into_id(sheet):
     #??? I don't know; I'm just trying to do the same thing as in SCL
-    label = gdb.get_label(sheet)
+    #label = gdb.get_label(sheet)
     # pieces = nest.get_pieces(sheet)
     # label_pieces = []
     # for piece in pieces:
@@ -142,75 +145,80 @@ def change_label_into_id(sheet):
     #     geo = 
 
 
-def insert_java_script(file, nCount):
-    line = f"""
-    <script type="text/javascript">
+
+def insert_java_script(file, count):
+    line = """
+    <SCRIPT type="text/javascript">
     /* <![CDATA[ */
-    function get_object(id) {{
+    function get_object(id) {
         var object = null;
-        if (document.layers) {{
+        if (document.layers) {
             object = document.layers[id];
-        }} else if (document.all) {{
+        } else if (document.all) {
             object = document.all[id];
-        }} else if (document.getElementById) {{
+        } else if (document.getElementById) {
             object = document.getElementById(id);
-        }}
+        }
         return object;
-    }}
+    }
+    
+    window.onload = function() {
+        var mainTable = document.getElementById('mainTable');
+        if (mainTable) {
+            var mainTableWidth = mainTable.offsetWidth;
+            var adjustableTables = document.querySelectorAll('.adjustable-table');
+            adjustableTables.forEach(function(table) {
+                table.style.width = mainTableWidth + 'px';
+            });
+        }
+    };
     """
     file.write(line)
 
-    while(nCount > 0):
-        sCount = str(nCount).zfill(3)
-        line = f'get_object("code{sCount}").innerHTML = DrawHTMLBarcode_Code39(get_object("code{sCount}").innerHTML, 0, "yes", "in", 0, 3, 0.4, 3, "top", "center", "", "black", "white");\n'
+    while(count > 0):
+        s_count = str(count).zfill(3)
+        line = f'get_object("code{s_count}").innerHTML = DrawHTMLBarcode_Code39(get_object("code{s_count}").innerHTML, 0, "yes", "in", 0, 3, 0.4, 3, "top", "center", "", "black", "white");\n'
         file.write(line)
-        nCount -= 1
+        count -= 1
 
     line = """
     /* ]]> */
-    </script>
+    </SCRIPT>
     """
     file.write(line)
 
 
-def write_html(file, logo, project_name, sheet, sheets, n_sheets, count, thickness, name, material, folder, pieces, total_area, curr1, curr2, total_reusable, total_garbage, img_path):  ####maaaybe do that differently?
-    #label = nest.get_sheet_property(sheet, nest.PieceProperties.LABEL)
-    label = 'abc'
+
+
+def write_html(file, logo, project_name, sheet, sheets, count, thickness, name, material, pieces, total_area, curr1, curr2, total_reusable, total_garbage, img_path):  ####maaaybe do that differently?
     width = nest.get_sheet_property(sheet, nest.SheetProperties.WIDTH)               #_NSheetWidth
     height = nest.get_sheet_property(sheet, nest.SheetProperties.HEIGHT)             #_NSheetHeight
     #bOk = bOk  AND  NestGetPieceProp( sPiece, _NPieceLabel, &sLabel) ;
+    line = """
+    </HEAD>
+    <BODY>
+    """
 
-    #open table, start a new page
-    line = "<TABLE"
+
     if count != 0:
         line += ' style="page-break-before:always"'
     file.write(line)
 
     #table for customer information - header row
     line = f"""
-    <TR>
-        <TD rowspan="3">
-            <IMG src="{logo}" align="middle">
-        </TD>
-    </TR>
-    <TR>
-        <TD>&nbsp;</TD>
-    </TR>
-    <TR>
-        <TD style="font-size:30px" align="right" width="150">Projekt:</TD>
-        <TD width="15">&nbsp;</TD>
-        <TD style="font-size:30px">{os.path.splitext(project_name)[0]}</TD>
-    </TR>
-    </TABLE>
+    <DIV>
+        <IMG src="{logo}">
+        <SPAN style="font-size: 35px; margin-left: 10px;">Projekt: {os.path.splitext(project_name)[0]}</SPAN>
+    </DIV>
     """
     file.write(line)
 
     #table for sheet information
-    line = '<TABLE border="1" cellspacing="1" cellpadding="1">'
+    line = '<TABLE id="mainTable">'
     file.write(line)
 
     #row with sheet name
-    line = f'<TR> <TD style="font-size:30px" colspan="6" align="middle">{sheet}</TD>'
+    line = f'<TR> <TD style="font-size:30px" colspan="6">{sheet}</TD>'
 
     count += 1
     s_count = str(count).zfill(3)
@@ -229,8 +237,6 @@ def write_html(file, logo, project_name, sheet, sheets, n_sheets, count, thickne
         <TD align="middle">{round(height, 2)}</TD>
         <TD align="middle">Stärke</TD>
         <TD align="middle">{round(thickness, 2)}</TD>
-        <TD align="middle">Name</TD>
-        <TD align="middle">{name}</TD>
         <TD align="middle">Material</TD>
         <TD align="middle">{material}</TD>
     </TR>
@@ -238,7 +244,6 @@ def write_html(file, logo, project_name, sheet, sheets, n_sheets, count, thickne
     file.write(line)
 
     #picture from the sheet
-    #sSizeImg = OPT( nWidth>3*nHeight, "width=^"1200pt^"", "height=^"400pt^"") ;
     size_img = "width=\"1200pt\"" if width > 3 * height else "height=\"400pt\""
     line = f'<TR> <TD colspan="10"> <IMG src="file:///{img_path}"{size_img}> </TD></TR>'
     file.write(line)
@@ -247,16 +252,20 @@ def write_html(file, logo, project_name, sheet, sheets, n_sheets, count, thickne
     pieces_on_sheet = nest.get_pieces(sheet)
     n_piece_count = 1
     for piece in pieces_on_sheet:
+        piece_width = nest.get_piece_property(piece, nest.PieceProperties.WIDTH)
+        piece_height = nest.get_piece_property(piece, nest.PieceProperties.HEIGHT)
+        piece_label = nest.get_piece_property(piece, nest.PieceProperties.LABEL)
+
         line = f"""
-        <TR>
+        <TR class="adjustable-table" style="width: 100%;">
             <TD align="middle">Nr.</TD>
             <TD align="middle">{n_piece_count}</TD>
             <TD align="middle">Bezeichnung</TD>
-            <TD align="middle">{label}</TD>
+            <TD align="middle">{piece_label}</TD>
             <TD align="middle">Breite</TD>
-            <TD align="middle">{width}</TD>
+            <TD align="middle">{round(piece_width, 2)}</TD>
             <TD align="middle">Höhe</TD>
-            <TD align="middle">{height}</TD>
+            <TD align="middle">{round(piece_height, 2)}</TD>
         </TR>
         """
         file.write(line)
@@ -300,28 +309,25 @@ def count_efficiency(file, sheet, sheets, pieces, total_area, curr1, curr2, tota
 def efficiency_for_sheet(pieces, total_area, curr1, curr2):
     return f"""<BR/>
         <BR/>
-        <TABLE border="1" cellspacing="1" cellpadding="1">
-
-            <TR>
-                <TD style="font-weight: normal;" width="250">Guteile</TD>
-                <TD>{pieces}</TD>
-            </TR>
-
-            <TR>
-                <TD>Gesamtfläche</TD>
-                <TD>{round(total_area, 2)}  m²</TD>
-            </TR>
-
-            <TR>
-                <TD>Nicht wiederverwendbares Material</TD>
-                <TD>{round(curr1, 2)}% des Blattes</TD>
-            </TR>
-
-            <TR>
-                <TD>Wiederverwendbares Material</TD>
-                <TD>{round(curr2, 2)}% des Blattes</TD>
-            </TR>
-        </TABLE>
+<TABLE class="adjustable-table">
+        <TH colspan="3" id="center-text">Effizienzbericht</TH>
+        <TR>
+            <TD>Guteile</TD>
+            <TD>{int(pieces)}</TD>
+        </TR>
+        <TR>
+            <TD>Gesamtfläche</TD>
+            <TD>{round(total_area, 2)}  m²</TD>
+        </TR>
+        <TR>
+            <TD>Nicht wiederverwendbares Material</TD>
+            <TD>{round(curr1, 2)}% des Blattes   </TD>
+        </TR>
+        <TR>
+            <TD>Wiederverwendbares Material</TD>
+            <TD>{round(curr2, 2)}% des Blattes   </TD>
+        </TR>
+    </TABLE>
         """
 
 
@@ -329,15 +335,18 @@ def efficiency_sheets_total(number_of_sheets, total_area, total_reusable, total_
     total_garbage /= number_of_sheets #bc I need to not only add % from every sheet but also get the Durchschnitt
     total_reusable /= number_of_sheets
     return f"""<BR/>
-        <TABLE border="7" cellspacing="2" cellpadding="3">
+        <TABLE id="thick-border" class="adjustable-table">
+            <TH colspan="3" id="center-text">Gesamtwirkungsgradbericht</TH>
 
-            <TR><TH style="font-weight: normal;" align="left">Anzahl Sheets</TH>
-                <TH style="font-weight: normal;" colspan="2" align="left"> {number_of_sheets}</TH>
+            <TR>
+                <TH align="left">Anzahl Sheets</TH>
+                <TH colspan="2" align="left">{number_of_sheets}</TH>
             </TR>
+
 
             <TR>
                 <TD>Gesamtfläche</TD>
-                <TH style="font-weight: normal;" colspan="2" align="left">{round(total_area, 2)} m²</TH>
+                <TH colspan="2" align="left">{round(total_area, 2)} m²</TH>
             </TR>
 
             <TR>
@@ -357,24 +366,71 @@ def efficiency_sheets_total(number_of_sheets, total_area, total_reusable, total_
 
 
 def html_header_write(project_name):
-    return f"""<!DOCTYPE html>
-    <html lang="de">
-    <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{project_name}</title>
-    <script type="text/javascript" src="js/code39.js"></script>
-    </head>
-    <body>
+    return f"""<!DOCTYPE HTML>
+<HTML lang="de">
+<HEAD>
+    <META charset="UTF-8">
+    <META name="viewport" content="width=device-width, initial-scale=1.0">
+    <TITLE>{project_name}</TITLE>
+    <SCRIPT type="text/javascript" src="js/code39.js"></SCRIPT>
     """
 
 
-def to_pdf(report_file, folder):
-    path_to_wkhtmltopdf = r'C:\Program Files\...\Bundles\wkhtmltopdf.exe'
-    config = pdfkit.configuration(wkhtmltopdf = path_to_wkhtmltopdf)
-    pdfkit.from_file(report_file, output_path = f'{folder}\report.pdf', configuration = config)
+# def to_pdf(report_file, folder):
+#     path_to_wkhtmltopdf = r'C:\Program Files\...\Bundles\wkhtmltopdf.exe'
+#     config = pdfkit.configuration(wkhtmltopdf = path_to_wkhtmltopdf)
+#     pdfkit.from_file(report_file, output_path = f'{folder}\report.pdf', configuration = config)
 
-    
+
+#    sWkHtmlToPdf = "wkhtmltopdf.exe" ;
+
+#    sPath = ExplodeFilePath ("%ROOTPATH%") ;
+#    sPath = STRMID( sPath, 1, STRLEN( sPath)- 9) ;
+#    sPath = sPath + "\Bundles\" ;
+
+#    // html in PDF umwandeln
+#    sExecute = ExplodeFilePath( FORMAT( "^"%s^" -O landscape ^"%s^" ^"%s.pdf^"", FORMAT( "%s%s", sPath, sWkHtmlToPdf), sOutFile, sOutFile)) ;
+
+#    bOk = bOk  AND  ExecuteProgram( sExecute, &nRet) ;
+
+#    sPath = GetRecentFilePath() ;
+
+#    // Übertragen in den Pfad der ewd...
+#    sDestFile = STRGSUB( sPath, ".ewd", ".pdf") ;
+
+#    bOk = bOk  AND  CopyFile( sOutFile     + ".pdf" , sDestFile, FALSE) ;
+
+
+def write_css(file):
+    line = """
+
+    <STYLE>
+        table {
+            border: 1px solid black;
+            margin: 10px 0;
+        }
+        th, td {
+            border: 1px solid black;
+            text-align: left;
+            font-weight: normal;
+            padding: 2px;
+        }
+        #thick-border {
+            border-width: 3px;
+        }
+        #center-text {
+            font-size: 20px;
+            padding: 3px;
+            text-align: center;
+        }
+        .adjustable-table {
+
+        }
+
+    </STYLE>
+"""
+    file.write(line)
+
 
 if __name__ == '__main__':
     main()
