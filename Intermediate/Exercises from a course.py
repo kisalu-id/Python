@@ -1,64 +1,40 @@
 import sys
 
 
-
-#main program
-while True:
-    print("\nMenü:")
-    print("1. Programm 1: Erhebung von persönlichen Daten")
-    print("2. Programm 2: Berechnung des Noten")
-    print("3. Programm 3: Taschenrechner")
-    print("4. Beenden")
-
-    #user-defined input
-    user_input = input("Bitte wählen Sie eine Option (1-4): ")
-
-    if user_input == '1':
-        print("Sie haben Programm 1 'Erhebung von persönlichen Daten' ausgewählt.")
-        get_pesonal_data()
-
-    elif user_input == '2':
-        print("Sie haben Programm 2 'Berechnung des Noten' ausgewählt.")
-        grade_point_average()
-
-    elif user_input == '3':
-        print("Sie haben Programm 3 'Taschenrechner' ausgewählt.")
-        calculator()
-
-    elif user_input == '4':
-        print("Das Programm wird beendet.")
-        sys.exit()
-    else:
-        print("Ungültige Auswahl. Bitte wählen Sie eine Option von 1 bis 4.")
+#validate a positive integer input
+def prompt_positive_int(prompt, max_value=120):
+    try:
+        value = int(input(prompt))
+        if value > 0 and (max_value is None or value <= max_value):
+            return value
+        print(f"Bitte geben Sie eine gültige Zahl größer als 0{' und kleiner als ' + str(max_value) if max_value else ''}.")
+    except ValueError:
+        print("Ungültige Eingabe. Bitte geben Sie eine Zahl ein.")
 
 
-# prompt the user for their personal info and save it in the variables
+#prompt the user for their personal info and save it in the variables
 def get_pesonal_data():
+    print("\n---Persönliche Daten---")
     # #query for the place of residence
-    residence = input("\nBitte geben Sie Ihren Wohnort ein: ").strip().upper()
+    residence = input("Bitte geben Sie Ihren Wohnort ein: ").strip().upper()
     #check if the place of residence is "Berlin"
     if residence == "BERLIN":
-        name = input("\nBitte geben Sie Ihren Vornamen ein: ").strip().upper()
+        name = input("Bitte geben Sie Ihren Vornamen ein: ").strip().upper()
         surname = input("Bitte geben Sie Ihren Nachnamen ein: ").strip().upper()
-        age = input("Wie alt sind Sie? ")
+        age = prompt_positive_int("Wie alt sind Sie? ", 150)
+
         #write the output from user-given information
-        print("\n\n---Persönliche Daten---")
-        if type(name) == str and type(surname) == str:
-            print(f"Name und Nachname: {name} {surname}")
-        else:
-            print(f"Die Eingaben für Name und Nachname sind vom Typ: {type(name)} und {type(surname)}")
-        if type(age) == int:
-            print(f"Alter: {age} Jahre")
-        else:
-            print(f"Die Eingabe für Alter ist vom Typ: {type(age)}")
-        if type(residence) == str:
-            print(f"Wohnort: {residence}")
-        else:
-            print(f"Die Eingabe für Wohnort ist vom Typ: {type(residence)}")
+        print("\n\nIhre Persönliche Daten:")
+        print(f"Name und Nachname: {name} {surname}")
+        print(f"Alter: {age} Jahre")
+        print(f"Wohnort: {residence}")
+    else:
+        print("Nur Personen aus Berlin können teilnehmen.")
+        
 
-
+#prompt the user for the number of subjects they have and store it in the variable
 def grade_point_average():
-    #prompt the user for the number of subjects they have and store it in the variable
+    print("\n---Notendurchschnitt---")
     num_subjects = int(input("\nWie viele Fächer hast du? "))
 
     #initialise the var as 0
@@ -91,8 +67,24 @@ def grade_point_average():
         print("Mit diesem Notendurchschnitt hast du eine sehr gute Chance auf eine direkte, unbefristete Übernahme!")
 
 
+#define reliable chars for calculator()
+def safe_evaluation(expr):
+    allowed_characters = "0123456789+-*/.()**"
+    if all(char in allowed_characters for char in expr):
+        try:
+            #check the expr
+            result = eval(expr)
+            return result
+        except ZeroDivisionError:
+            return "Fehler: Division durch Null ist nicht erlaubt."
+        except Exception as e:
+            return f"Fehler bei der Auswertung: {e}"
+    else:
+        return "Ungültige Eingabe. Bitte nur Zahlen und erlaubte Operatoren verwenden."
+
+
 def calculator():
-    print("\nTaschenrechner")
+    print("\n---Taschenrechner---")
     print("Geben Sie einen mathematischen Ausdruck ein (z. B. 2 + 3, 5**2)\noder 'Beenden', um das Programm zu schließen.")
     expr = input("Eingabe: ").strip()
 
@@ -110,17 +102,36 @@ def calculator():
             print(f"Fehler bei der Auswertung: {e}")
 
 
-def safe_evaluation(expr):
-    #define reliable chars
-    allowed_characters = "0123456789+-*/.()**"
-    if all(char in allowed_characters for char in expr):
-        try:
-            #check the expr
-            result = eval(expr)
-            return result
-        except ZeroDivisionError:
-            return "Fehler: Division durch Null ist nicht erlaubt."
-        except Exception as e:
-            return f"Fehler bei der Auswertung: {e}"
-    else:
-        return "Ungültige Eingabe. Bitte nur Zahlen und erlaubte Operatoren verwenden."
+#main program
+def main():
+    while True:
+        print("\n---Menü---")
+        print("1. Programm 1: Erhebung von persönlichen Daten")
+        print("2. Programm 2: Berechnung des Noten")
+        print("3. Programm 3: Taschenrechner")
+        print("4. Beenden")
+
+        #user-defined input
+        user_input = input("Bitte wählen Sie eine Option (1-4): ")
+
+        if user_input == '1':
+            print("Sie haben Programm 1 'Erhebung von persönlichen Daten' ausgewählt.")
+            get_pesonal_data()
+
+        elif user_input == '2':
+            print("Sie haben Programm 2 'Berechnung des Noten' ausgewählt.")
+            grade_point_average()
+
+        elif user_input == '3':
+            print("Sie haben Programm 3 'Taschenrechner' ausgewählt.")
+            calculator()
+
+        elif user_input == '4':
+            print("Das Programm wird beendet.")
+            sys.exit()
+        else:
+            print("Ungültige Auswahl. Bitte wählen Sie eine Option von 1 bis 4.")
+
+
+if __name__ == "__main__":
+    main()
