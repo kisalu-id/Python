@@ -7,6 +7,7 @@ def prompt_positive_int(prompt, max_value=120):
         value = int(input(prompt))
         if value > 0 and (max_value is None or value <= max_value):
             return value
+        #it's possible to perform if/else statements inside the placeholders using F-Strings
         print(f"Bitte geben Sie eine gültige Zahl größer als 0{' und kleiner als ' + str(max_value) if max_value else ''}.")
     except ValueError:
         print("Ungültige Eingabe. Bitte geben Sie eine Zahl ein.")
@@ -19,18 +20,25 @@ def get_pesonal_data():
     residence = input("Bitte geben Sie Ihren Wohnort ein: ").strip().upper()
     #check if the place of residence is "Berlin"
     if residence == "BERLIN":
-        name = input("Bitte geben Sie Ihren Vornamen ein: ").strip().upper()
-        surname = input("Bitte geben Sie Ihren Nachnamen ein: ").strip().upper()
+        name = input("Bitte geben Sie Ihren Vornamen ein: ").strip()
+        surname = input("Bitte geben Sie Ihren Nachnamen ein: ").strip()
         age = prompt_positive_int("Wie alt sind Sie? ", 150)
 
         #write the output from user-given information
         print("\n\nIhre Persönliche Daten:")
-        print(f"Name und Nachname: {name} {surname}")
+        print(f"Name und Nachname: {name.capitalize()} {surname.capitalize()}")
+        print(f"Wohnort: {residence.capitalize()}")
         print(f"Alter: {age} Jahre")
-        print(f"Wohnort: {residence}")
+
+        age_format = "Ihr Alter in Binär: {:b}\nIhr Alter in Oktal: {:o}\nIhr Alter in Hexadezimal: {:x}"
+        print(age_format.format(age, age, age))
+
+        #instead of
+        #print(f"Ihr Alter in Binär: {age:b}\nIhr Alter in Oktal: {age:o}\nIhr Alter in Hexadezimal: {age:x}")
+
     else:
         print("Nur Personen aus Berlin können teilnehmen.")
-        
+
 
 #prompt the user for the number of subjects they have and store it in the variable
 def grade_point_average():
@@ -135,3 +143,50 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# // (ganzzahlige Division): 1 // 2 ergibt 0 (ganzzahlig, Dezimalstellen werden abgeschnitten).
+# / (echte Division): 1 / 2 ergibt 0.5 (Gleitkommazahl).
+
+# ** (Exponentiation): 2 ** 3 ergibt 8 (2 hoch 3).
+# * (Multiplikation): 2 * 3 ergibt 6 (2 mal 3).
+
+
+# &=
+# bitwise AND between x and 3, then assigns the result to x
+
+# |=
+# bitwise OR between x and 3, then assigns the result to x
+
+# ^=
+# bitwise XOR between x and 3, then assigns the result to x
+# x = 5
+# y = 6
+# print(f"{x} = {x:b}")
+# print(f"{y} = {y:b}\n")
+# x ^= y
+# print(f"{x} = {x:b}")
+# Output:
+# 5 = 101
+# 6 = 110
+# 3 = 11
+
+# >>= (or also <<=)
+# right bitwise shift on x by 3 positions, then assigns the result to x
+# x = 12
+# print(f"{x} = {x:b}")
+# x >>= 1
+# print(f"{x} = {x:b}")
+# Output:
+# 12 = 1100 
+# 6 = 110
+
+# := (Walrus operator)
+# assigns a value to a variable as part of an expression
+# Example:
+# x = 10
+# print(x)
+# print(x := 3)
+# Output:
+# 10
+# 3
