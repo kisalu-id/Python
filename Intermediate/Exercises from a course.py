@@ -190,3 +190,6 @@ if __name__ == "__main__":
 # Output:
 # 10
 # 3
+
+
+#forgot to add the fibonacci funct and the prime numbers funct here, will do tomorrow
