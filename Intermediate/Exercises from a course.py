@@ -164,7 +164,10 @@ def main():
             
         elif user_input == '4':
             print("Sie haben Programm 4 'Fibonacci' ausgewählt.")
-            fibonacci(0, 1)
+            first, second = 0, 1
+            print(first)
+            print(second)
+            fibonacci(first, second)
             
         elif user_input == '5':
             print("Sie haben Programm 5 'Prime Numbers' ausgewählt.")
