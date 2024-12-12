@@ -110,6 +110,32 @@ def calculator():
             print(f"Fehler bei der Auswertung: {e}")
 
 
+def fibonacci(first, second):
+    third = first + second
+    if third < 50:
+        print(third)
+        fibonacci(second, third)
+
+
+def prime_nums(i, divisor, limit):
+    if i > limit:
+        return
+
+    if i < 2: #is will not happen bc i pass "2" as a value for i, but just in case
+        prime_nums(i + 1, 2, limit)
+        pass
+
+    if i == divisor:
+        print(i)
+        prime_nums(i + 1, 2, limit)
+
+    elif i % divisor == 0:
+        prime_nums(i + 1, 2, limit)
+
+    else:
+        prime_nums(i, divisor + 1, limit)
+
+
 #main program
 def main():
     while True:
@@ -117,7 +143,9 @@ def main():
         print("1. Programm 1: Erhebung von persönlichen Daten")
         print("2. Programm 2: Berechnung des Noten")
         print("3. Programm 3: Taschenrechner")
-        print("4. Beenden")
+        print("4. Programm 4: Fibonacci")
+        print("5. Programm 5: Prime Numbers")
+        print("6. Beenden")
 
         #user-defined input
         user_input = input("Bitte wählen Sie eine Option (1-4): ")
@@ -133,8 +161,16 @@ def main():
         elif user_input == '3':
             print("Sie haben Programm 3 'Taschenrechner' ausgewählt.")
             calculator()
-
+            
         elif user_input == '4':
+            print("Sie haben Programm 4 'Fibonacci' ausgewählt.")
+            fibonacci(0, 1)
+            
+        elif user_input == '5':
+            print("Sie haben Programm 5 'Prime Numbers' ausgewählt.")
+            prime_nums(2, 2, 50)
+            
+        elif user_input == '6':
             print("Das Programm wird beendet.")
             sys.exit()
         else:
@@ -143,6 +179,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
 
 
 # // (ganzzahlige Division): 1 // 2 ergibt 0 (ganzzahlig, Dezimalstellen werden abgeschnitten).
@@ -190,6 +228,3 @@ if __name__ == "__main__":
 # Output:
 # 10
 # 3
-
-
-#forgot to add the fibonacci funct and the prime numbers funct here, will do tomorrow
