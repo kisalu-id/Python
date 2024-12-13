@@ -112,9 +112,31 @@ def calculator():
 
 def fibonacci(first, second):
     third = first + second
-    if third < 50:
-        print(third)
-        fibonacci(second, third)
+    try:
+        txt_path = r"C:\Users\FolderName"
+        file_name = "Fibonacci.txt"
+        print(f"- {third}")
+        third = first + second
+
+        if third < 50:
+            print(third)
+            file_path = os.path.join(txt_path, file_name)
+
+            if os.path.exists(file_path):
+                with open(file_path, 'a') as f:
+                    f.writelines(f"{third}\n")
+            else:
+                with open(file_path, 'w') as f:
+                    f.writelines(f"{first}\n{second}\n{third}\n")
+
+            fibonacci(second, third) #recursion
+
+    except FileNotFoundError:
+        print(f"Die Datei {file_path} wurde nicht gefunden.")
+    except IOError as e:
+        print(f"Ein Fehler trat beim Schreiben in die Datei auf: {e}")
+    except Exception as e:
+        print(f"Ein Fehler ist aufgetreten: {e}")
 
 
 def prime_nums(i, divisor, limit):
@@ -122,11 +144,29 @@ def prime_nums(i, divisor, limit):
         return
 
     if i < 2: #is will not happen bc i pass "2" as a value for i, but just in case
-        prime_nums(i + 1, 2, limit)
+        prime_nums(i + 1, 2, limit) 
         pass
 
     if i == divisor:
         print(i)
+        try:
+            txt_path = r"C:\Users\FolderName"
+            file_name = "Prime numbers.txt"
+            file_path = os.path.join(txt_path, file_name)
+
+            if os.path.exists(file_path):
+                with open(file_path, 'a') as f:
+                    f.writelines(f"{i}\n")
+            else:
+                with open(file_path, 'w') as f:
+                    f.writelines(f"Prime numbers:\n{i}\n")
+        except FileNotFoundError:
+            print(f"Die Datei {file_path} wurde nicht gefunden.")
+        except IOError as e:
+            print(f"Ein Fehler trat beim Schreiben in die Datei auf: {e}")
+        except Exception as e:
+            print(f"Ein Fehler ist aufgetreten: {e}")
+
         prime_nums(i + 1, 2, limit)
 
     elif i % divisor == 0:
@@ -134,6 +174,7 @@ def prime_nums(i, divisor, limit):
 
     else:
         prime_nums(i, divisor + 1, limit)
+
 
 
 #main program
