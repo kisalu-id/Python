@@ -110,6 +110,7 @@ def calculator():
             print(f"Fehler bei der Auswertung: {e}")
 
 
+#if you wanna see the previous version without writing into .txt go here ---> https://github.com/kisalu-id/Python/blob/155d1d42d990926777558508f51a5a3af3966f0e/Intermediate/Exercises%20from%20a%20course.py
 def fibonacci(first, second):
     third = first + second
     try:
@@ -139,6 +140,7 @@ def fibonacci(first, second):
         print(f"Ein Fehler ist aufgetreten: {e}")
 
 
+#if you wanna see the previous version without writing into .txt go here ---> https://github.com/kisalu-id/Python/blob/155d1d42d990926777558508f51a5a3af3966f0e/Intermediate/Exercises%20from%20a%20course.py
 def prime_nums(i, divisor, limit):
     if i > limit:
         return
