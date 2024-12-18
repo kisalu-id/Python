@@ -1,5 +1,5 @@
 import sys
-
+import os
 
 #validate a positive integer input
 def prompt_positive_int(prompt, max_value=120):
@@ -42,8 +42,11 @@ def get_pesonal_data():
 
 #prompt the user for the number of subjects they have and store it in the variable
 def grade_point_average():
-    print("\n---Notendurchschnitt---")
-    num_subjects = int(input("\nWie viele Fächer hast du? "))
+    try:
+        num_subjects = int(input("\nWie viele Fächer hast du? "))
+    except ValueError:
+        print("Ungültige Eingabe. Bitte geben Sie eine gültige Anzahl von Fächern ein.")
+        return
 
     #initialise the var as 0
     sum = 0
@@ -51,12 +54,18 @@ def grade_point_average():
     excellent_threshold = 2.0
 
     #for the given amount of times add the grades to the sum variable
-    for i in range (num_subjects):
-        try:
-            sum += int(input(f"Gib die Note für Fach {i+1} ein: "))
-        except ValueError:  
-            print("Ungültige Eingabe. Bitte geben Sie eine gültige Note ein.")
-            return
+    for i in range(num_subjects):
+        while True:
+            try:
+                grade = float(input(f"Gib die Note für Fach {i + 1} ein: "))
+                if grade < 1.0 or grade > 6.0:  #validate the correct grade
+                    print("Bitte geben Sie eine Note zwischen 1.0 und 6.0 ein.")
+                else:
+                    sum += grade
+                    break
+            except ValueError:
+                print("Ungültige Eingabe. Bitte geben Sie eine gültige Note ein.")
+
         
     current_average = sum/num_subjects
 
@@ -104,23 +113,21 @@ def calculator():
             #safely evaluate the expression
             result = safe_evaluation(expr)
             print(f"Ergebnis: {result}")
-        except ZeroDivisionError:
-            print("Fehler: Division durch Null ist nicht erlaubt.")
         except Exception as e:
             print(f"Fehler bei der Auswertung: {e}")
 
 
-#if you wanna see the previous version without writing into .txt go here ---> https://github.com/kisalu-id/Python/blob/155d1d42d990926777558508f51a5a3af3966f0e/Intermediate/Exercises%20from%20a%20course.py
 def fibonacci(first, second):
     third = first + second
-    try:
-        txt_path = r"C:\Users\FolderName"
-        file_name = "Fibonacci.txt"
-        print(f"- {third}")
-        third = first + second
 
-        if third < 50:
-            print(third)
+    txt_path = r"C:\Users\FolderName"
+    file_name = "Fibonacci.txt"
+    print(f"- {third}")
+    third = first + second
+
+    if third < 50:
+        print(third)
+        try:
             file_path = os.path.join(txt_path, file_name)
 
             if os.path.exists(file_path):
@@ -132,15 +139,14 @@ def fibonacci(first, second):
 
             fibonacci(second, third) #recursion
 
-    except FileNotFoundError:
-        print(f"Die Datei {file_path} wurde nicht gefunden.")
-    except IOError as e:
-        print(f"Ein Fehler trat beim Schreiben in die Datei auf: {e}")
-    except Exception as e:
-        print(f"Ein Fehler ist aufgetreten: {e}")
+        except FileNotFoundError:
+            print(f"Die Datei {file_path} wurde nicht gefunden.")
+        except IOError as e:
+            print(f"Ein Fehler trat beim Schreiben in die Datei auf: {e}")
+        except Exception as e:
+            print(f"Ein Fehler ist aufgetreten: {e}")
 
 
-#if you wanna see the previous version without writing into .txt go here ---> https://github.com/kisalu-id/Python/blob/155d1d42d990926777558508f51a5a3af3966f0e/Intermediate/Exercises%20from%20a%20course.py
 def prime_nums(i, divisor, limit):
     if i > limit:
         return
@@ -176,7 +182,6 @@ def prime_nums(i, divisor, limit):
 
     else:
         prime_nums(i, divisor + 1, limit)
-
 
 
 #main program
@@ -225,6 +230,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
