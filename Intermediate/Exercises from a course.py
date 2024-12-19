@@ -42,6 +42,7 @@ def get_pesonal_data():
 
 #prompt the user for the number of subjects they have and store it in the variable
 def grade_point_average():
+    print("\n---Notendurchschnitt---")
     try:
         num_subjects = int(input("\nWie viele Fächer hast du? "))
     except ValueError:
@@ -66,7 +67,6 @@ def grade_point_average():
             except ValueError:
                 print("Ungültige Eingabe. Bitte geben Sie eine gültige Note ein.")
 
-        
     current_average = sum/num_subjects
 
     #calculate the average grade and print the result
@@ -117,34 +117,34 @@ def calculator():
             print(f"Fehler bei der Auswertung: {e}")
 
 
-def fibonacci(first, second):
+def ensure_directory_exists(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+
+def write_to_file(directory, filename, content, append=True):
+    ensure_directory_exists(directory)
+    file_path = os.path.join(directory, filename)
+    mode = 'a' if append and os.path.exists(file_path) else 'w'
+    try:
+        with open(file_path, mode) as f:
+            f.writelines(content)
+    except IOError as e:
+        print(f"Ein Fehler trat beim Schreiben in die Datei auf: {e}")
+    except Exception as e:
+        print(f"Ein unbekannter Fehler ist aufgetreten: {e}")
+
+
+def fibonacci(first, second, directory, filename, limit):
     third = first + second
 
-    txt_path = r"C:\Users\FolderName"
-    file_name = "Fibonacci.txt"
-    print(f"- {third}")
-    third = first + second
+    if third >= limit:
+        return
 
-    if third < 50:
-        print(third)
-        try:
-            file_path = os.path.join(txt_path, file_name)
+    print(third)
 
-            if os.path.exists(file_path):
-                with open(file_path, 'a') as f:
-                    f.writelines(f"{third}\n")
-            else:
-                with open(file_path, 'w') as f:
-                    f.writelines(f"{first}\n{second}\n{third}\n")
-
-            fibonacci(second, third) #recursion
-
-        except FileNotFoundError:
-            print(f"Die Datei {file_path} wurde nicht gefunden.")
-        except IOError as e:
-            print(f"Ein Fehler trat beim Schreiben in die Datei auf: {e}")
-        except Exception as e:
-            print(f"Ein Fehler ist aufgetreten: {e}")
+    write_to_file(r"C:\Folder", "Fibonacci.txt", f"{third}\n")
+    fibonacci(second, third, directory, filename, limit)
 
 
 def prime_nums(i, divisor, limit):
@@ -157,24 +157,7 @@ def prime_nums(i, divisor, limit):
 
     if i == divisor:
         print(i)
-        try:
-            txt_path = r"C:\Users\FolderName"
-            file_name = "Prime numbers.txt"
-            file_path = os.path.join(txt_path, file_name)
-
-            if os.path.exists(file_path):
-                with open(file_path, 'a') as f:
-                    f.writelines(f"{i}\n")
-            else:
-                with open(file_path, 'w') as f:
-                    f.writelines(f"Prime numbers:\n{i}\n")
-        except FileNotFoundError:
-            print(f"Die Datei {file_path} wurde nicht gefunden.")
-        except IOError as e:
-            print(f"Ein Fehler trat beim Schreiben in die Datei auf: {e}")
-        except Exception as e:
-            print(f"Ein Fehler ist aufgetreten: {e}")
-
+        write_to_file(r"C:\Folder", "Prime numbers.txt", f"{i}\n")
         prime_nums(i + 1, 2, limit)
 
     elif i % divisor == 0:
@@ -196,7 +179,7 @@ def main():
         print("6. Beenden")
 
         #user-defined input
-        user_input = input("Bitte wählen Sie eine Option (1-4): ")
+        user_input = input("Bitte wählen Sie eine Option (1-6): ")
 
         if user_input == '1':
             print("Sie haben Programm 1 'Erhebung von persönlichen Daten' ausgewählt.")
@@ -213,14 +196,15 @@ def main():
         elif user_input == '4':
             print("Sie haben Programm 4 'Fibonacci' ausgewählt.")
             first, second = 0, 1
-            print(first)
-            print(second)
-            fibonacci(first, second)
-            
+            directory, filename = r"C:\Folder", "Fibonacci.txt"
+            limit = 70
+            print(f"{first}\n{second}")
+            write_to_file(directory, filename, f"Fibonacci numbers:\n{first}\n{second}\n", append=False)
+            fibonacci(first, second, directory, filename, limit)
         elif user_input == '5':
             print("Sie haben Programm 5 'Prime Numbers' ausgewählt.")
-            prime_nums(2, 2, 50)
-            
+            write_to_file(r"C:\Folder", "Prime numbers.txt", "Prime numbers:\n", append=False)
+            prime_nums(2, 2, 70)
         elif user_input == '6':
             print("Das Programm wird beendet.")
             sys.exit()
