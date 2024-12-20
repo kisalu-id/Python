@@ -1,0 +1,17 @@
+def read_csv():
+    csv_file_path = r"C:\Users\test.csv"
+    with open (csv_file_path, 'r') as f:
+        lines = f.readlines()  #read all lines from the file
+        for i, line in enumerate(lines, start=1):
+            line_list = line.split(",")
+            if i == 1:
+                #get the names of ther values
+                #a, b, c = line_list  # or line.split(",")  ?
+
+            else: #line != 1
+                #get the values
+
+
+
+if __name__ == "__main__":
+    read_csv()
