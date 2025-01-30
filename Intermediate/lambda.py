@@ -22,14 +22,13 @@ books = [
 
 # a)sort books by publication year
 #key argument tells Python how to sort the items; 
-#lambda book: book["year"] extracts the "year" value from each book dictionary
-sorted_books = sorted(books, key=lambda book: book["year"])
-print("\nSortierte Bücher:", sorted_books)
+            #lambda book: book["year"] extracts the "year" value from each book dictionary
+print("\n\nSortierte Bücher:", *sorted(books, key=lambda b: b["year"]), sep="\n")
 
 # b)filter books that were published after 2019
-filtered_books = list(filter(lambda book: book["year"] > 2019, books))
-print("Bücher nach 2019:", filtered_books)
+print("\nBücher nach 2019:", *filter(lambda b: b["year"] > 2019, books), sep="\n")
 
 # c)create a list with the titles of the books
 titles = list(map(lambda book: book["title"], books))
-print("Buchtitel:", titles)
+print("\nBuchtitel:")
+print(*titles, sep="\n")
