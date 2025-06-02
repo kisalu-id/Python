@@ -1,10 +1,6 @@
-def main():
-    path_to_csv = r"C:\...\Trainingsdaten.csv"
-    data = read_data(path_to_csv)
-    cpt = create_cpt(data)
-    
-    print("\n...")
-    
+import csv
+import random
+
 
 def create_cpt(data):
     cpt = {} 
@@ -19,16 +15,12 @@ def create_cpt(data):
     income_count = {0: 0, 1: 0}
     age_count = {0: 0, 1: 0}
     
-    #Bedingte Wahrscheinlichkeitstabelle will look like that
-    #(1, 1): {1: 0.2, 0: 0.8},
-    #(0, 1): {1: 0.1, 0: 0.9},
-    
     #counting how many ppl have 0/1 age and 0/1 income
     #and how many chose An/Apple with X income and X age
     for icnome, age, decision in data:
         income_count[icnome] += 1
         age_count[age] += 1
-        #we will get z.B.;
+        #we will get:
         #    income_count = {0: 35, 1: 33}
         #    age_count = {0: 38, 1: 30}
         key_income_age = (icnome, age)
@@ -76,14 +68,17 @@ def create_cpt(data):
             total_ppl_for_key = sum(decision_counts.values())
             p_android = decision_counts.get(0, 0) / total_ppl_for_key
             p_apple = decision_counts.get(0, 0) / total_ppl_for_key
-        
-        
+            cpt[key_income_age] = {0: probability_android, 1: probability_apple}
+            
+        print(f"cpt:                        {cpt}")
+        return cpt, probability_income, probability_age
         
     else:
         print(" T_T ")
         return 
     
     return cpt
+
 
 def read_data(path_to_csv):
     try:
@@ -96,6 +91,33 @@ def read_data(path_to_csv):
     except ValueError:
         print(f"Error: Could not convert one or more values to integers in {path_to_csv}")
         return []
+
+
+
+def probability_age_given_decision(cpt, data, given_age, given_decision):
+    """How likely is it that the user is (given_age, e.g.) young, given that they bought (given_decision, e.g.) Android?"""
+    #P(age=1 | decision=0) = P(age=1, decision=0) / P(decision=0)
+    #prpbability = people_of_given_age_who_bought_Andr / all people who bought Android
+
+
+
+def main():
+    path_to_csv = r"C:\...\Training_data.csv"
+    data = read_data(path_to_csv)
+    cpt, probability_income, probability_age = create_cpt(data)
+    
+    simple_prediction_with_forward_sampling(cpt, probability_income, probability_age)
+
+    print("Input: Income (0=niedrig, 1=hoch), Age (0=alt, 1=jung)")
+    input_str = input("Input data (format: income,age) e.g. 1,0:  ")
+    income_str, age_str = input_str.strip().split(',')
+    income = int(income_str)
+    age = int(age_str)
+    predict_decision(cpt, income, age)
+    
+    probability_age_given_decision(cpt, data, given_age = 0, given_decision = 0)
+
+
 
 if __name__ == "__main__":
     main()
