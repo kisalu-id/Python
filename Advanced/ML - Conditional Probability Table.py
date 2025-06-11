@@ -1,7 +1,6 @@
 import random
 
 
-
 def read_data(path_to_csv):
     """
     Read training data from a CSV file and parse it into a list of tuples.
@@ -105,10 +104,78 @@ def create_cpt(data):
         return cpt, probability_income, probability_age
 
     else:
-        print("total_counted != data_length  T_T ")
+        print("total_counted != data_length  ... sad T_T ")
         return
 
 
+
+def simple_prediction_with_forward_sampling(cpt, probability_income, probability_age):
+    """
+    Simulate a prediction using forward sampling from the CPT.
+    Randomly selects income and age based on marginal probabilities, 
+    and then predicts a decision using the CPT.
+
+    :param cpt: Conditional Probability Table
+    :type cpt: dict
+    :param probability_income: Marginal probabilities for income
+    :type probability_income: dict[int, float]
+    :param probability_age: Marginal probabilities for age
+    :type probability_age: dict[int, float]
+    """
+    #chosing between 0 and 1, wehights - there's a 41% chance to pick 0 for income
+    income = random.choices([0, 1], weights=[
+        probability_income[0], probability_income[1]
+    ])[0]
+    print(f"\nSampled income: {income} with weights:  {probability_income})")
+    
+    age = random.choices([0, 1], weights=[
+        probability_age[0], probability_age[1]
+    ])[0]
+    print(f"Sampled age: {age} with weights:  {probability_age})")
+    
+    decision_probabilities = cpt.get((income, age), None)
+    print(f"Decision probabilities for (income = {income}, age = {age}): {decision_probabilities}")
+    
+    if decision_probabilities is None:
+        print("No CPT entry for sampled income/age.")
+        return
+
+    print("\nPrediction using forward sampling")
+    predict_decision(cpt, income, age)
+
+
+
+def predict_decision(cpt, income, age):
+    """
+    Predict the smartphone decision (Android/Apple) based on income and age.
+
+    :param cpt: Conditional Probability Table
+    :type cpt: dict
+    :param income: Income level (0 = low, 1 = high)
+    :type income: int
+    :param age: Age group (0 = old, 1 = young)
+    :type age: int
+    """
+    key = (income, age)
+    print(f"Predicting decision for key: {key}")
+    try:
+        if key not in cpt:
+            print("Invalid combination of income and age.")
+            return
+        decision_probabilities = cpt[key]
+        
+        if decision_probabilities[0] > decision_probabilities[1]:
+            decision_str = "\"Android\""   #Android
+        else:
+            decision_str = "\"Apple\""   #Apple
+        
+        income_str = "\"high\"" if income == 1 else "\"low\""
+        age_str = "\"young\"" if age == 1 else "\"old\""
+        
+        print(f"\nDecision for {income_str} income , age {age_str}:  {decision_str}")
+
+    except Exception as e:
+        print("Invalid input format. Please enter something like: 1,0")
 
 
 
