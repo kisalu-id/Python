@@ -179,10 +179,38 @@ def predict_decision(cpt, income, age):
 
 
 
-def probability_age_given_decision(cpt, data, given_age, given_decision):
-    """How likely is it that the user is (given_age, e.g.) young, given that they bought (given_decision, e.g.) Android?"""
+def probability_age_given_decision(data, given_age, given_decision):
+    """
+    Calculate P(age | decision), i.e. the probability of a given age 
+    given the user made a specific decision.
+
+    :param data: List of tuples (income, age, decision)
+    :type data: list[tuple[int, int, int]]
+    :param given_age: Age group to check (0 = old, 1 = young)
+    :type given_age: int
+    :param given_decision: Decision made (0 = Android, 1 = Apple)
+    :type given_decision: int
+    """
     #P(age=1 | decision=0) = P(age=1, decision=0) / P(decision=0)
     #prpbability = people_of_given_age_who_bought_Andr / all people who bought Android
+    count_people_decision = 0
+    count_people_age_decision = 0
+    
+    for income, age, decision in data:
+        if decision == given_decision:
+            count_people_decision += 1
+            if age == given_age:
+                count_people_age_decision += 1
+    
+    age_str = "\"young\"" if given_age == 1 else "\"old\""
+    decision_str = "\"Apple\"" if given_decision == 1 else "\"Android\""
+    
+    #print(f"The probability that a user is {age_str} given they chose {decision_str} is {probability}")
+        
+    print(f"Total amount of people who made the decision {decision_str}:  {count_people_decision}")
+    print(f"Total amount of people of the age {age_str} who made the decision {decision_str}:  {count_people_age_decision}")
+    probability = round(count_people_age_decision / count_people_decision, 2)
+    print(f"The probability that a user is age {age_str} given they chose decision {decision_str}: {probability}")
 
 
 
